@@ -1,0 +1,17 @@
+[
+    {
+        "name": "antenor",
+        "point_1": [100, 50], 
+        "point_2": [200, 190]
+    },
+    {
+        "name": "produto B",
+        "point_1": [300, 50], 
+        "point_2": [400, 190]
+    },
+    {
+        "name": "produto C",
+        "point_1": [500, 50], 
+        "point_2": [600, 190]
+    }
+]
