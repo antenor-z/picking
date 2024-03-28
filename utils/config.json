@@ -1,8 +1,8 @@
 [
     {
-        "name": "antenor",
-        "point_1": [100, 50], 
-        "point_2": [200, 190]
+        "name": "globo",
+        "point_1": [200, 200], 
+        "point_2": [300, 300]
     },
     {
         "name": "produto B",

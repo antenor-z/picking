@@ -2,13 +2,15 @@ import mediapipe as mp
 import json
 import cv2
 
-with open("config.json") as fp:
-    points_of_interest = json.load(fp)
 
 def mid_point(acc_cx, acc_cy):
     avg_cx = int(sum(acc_cx) / len(acc_cx))
     avg_cy = int(sum(acc_cy) / len(acc_cy))
     return [avg_cx, avg_cy]
+
+
+with open("utils/config.json") as fp:
+    points_of_interest = json.load(fp)
 
 cap = cv2.VideoCapture(0)
 
@@ -26,7 +28,7 @@ while True:
     results = hands.process(imgRGB)
 
     if results.multi_hand_landmarks:
-        hands_positions = [] # reset list
+        hands_positions = []  # reset list
         for handLms in results.multi_hand_landmarks:
             acc_cx = []
             acc_cy = []
@@ -50,16 +52,15 @@ while True:
         title_position = (int(location["point_1"][0]), int(location["point_1"][1] - 10))
         cv2.putText(img, location["name"], title_position, cv2.QT_FONT_NORMAL, 0.8, color, 1)
         cv2.rectangle(img, location["point_1"], location["point_2"], color, 1)
-            
-    
+
     img = cv2.copyMakeBorder(img, 80, 0, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
     cv2.putText(img, " ".join(matches), (10, 30), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
-    #cv2.putText(img, str(hands_positions), (10, 60), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
+    # cv2.putText(img, str(hands_positions), (10, 60), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
 
     cv2.imshow("TOP CIENCIA DE DADOS I", img)
 
     key = cv2.waitKey(1) & 0xFF
-    if key == ord('q') or cv2.getWindowProperty('TOP CIENCIA DE DADOS I', cv2.WND_PROP_VISIBLE) < 1:
+    if key == ord("q") or cv2.getWindowProperty("TOP CIENCIA DE DADOS I", cv2.WND_PROP_VISIBLE) < 1:
         break
 
 cap.release()
