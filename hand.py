@@ -1,22 +1,56 @@
 import mediapipe as mp
 import json
 import cv2
+import json
 
+TOP_BORDER_HEIGHT = 80
+CONFIG_PATH = "utils/config.json"
 
 def mid_point(acc_cx, acc_cy):
     avg_cx = int(sum(acc_cx) / len(acc_cx))
     avg_cy = int(sum(acc_cy) / len(acc_cy))
     return [avg_cx, avg_cy]
 
+with open(CONFIG_PATH) as fp:
+    points_of_interest = list(json.load(fp))
 
-with open("utils/config.json") as fp:
-    points_of_interest = json.load(fp)
+drawing = False
+ix,iy = -1,-1
+def draw_rectangle(event, x, y, flags, param):
+    global drawing, rect_start, points_of_interest
+    if event == cv2.EVENT_LBUTTONDOWN:
+        drawing = True
+        rect_start = (x, y)
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if drawing:
+            img_copy = img.copy()
+            cv2.rectangle(img_copy, rect_start, (x, y), (0, 255, 0), 1)
+            cv2.imshow("TOP CIENCIA DE DADOS I", img_copy)
+    elif event == cv2.EVENT_LBUTTONUP:
+        drawing = False
+        rect_end = (x, y)
+        cv2.rectangle(img, rect_start, rect_end, (0, 255, 0), 1)
+        cv2.imshow("TOP CIENCIA DE DADOS I", img)
+        name = input("nome do objeto (deixe em branco para cancelar): ")
+        if name.strip() != "":
+            new_rect = {
+                "name": name,
+                "point_1": [rect_start[0], rect_start[1] - TOP_BORDER_HEIGHT], 
+                "point_2": [rect_end[0], rect_end[1] - TOP_BORDER_HEIGHT]
+            }
+            points_of_interest.append(new_rect)
+            with open(CONFIG_PATH, "w") as fp:
+                json.dump(points_of_interest, fp=fp, indent=4)
+            print("OK")
 
 cap = cv2.VideoCapture(0)
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 mp_draw = mp.solutions.drawing_utils
+
+cv2.namedWindow("TOP CIENCIA DE DADOS I")
+cv2.setMouseCallback("TOP CIENCIA DE DADOS I", draw_rectangle)
 
 while True:
     hands_positions = []
@@ -53,7 +87,7 @@ while True:
         cv2.putText(img, location["name"], title_position, cv2.QT_FONT_NORMAL, 0.8, color, 1)
         cv2.rectangle(img, location["point_1"], location["point_2"], color, 1)
 
-    img = cv2.copyMakeBorder(img, 80, 0, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    img = cv2.copyMakeBorder(img, TOP_BORDER_HEIGHT, 0, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
     cv2.putText(img, " ".join(matches), (10, 30), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
     # cv2.putText(img, str(hands_positions), (10, 60), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
 
