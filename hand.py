@@ -99,8 +99,9 @@ while True:
         cv2.rectangle(img, location["point_1"], location["point_2"], color, 1)
 
     img = cv2.copyMakeBorder(img, TOP_BORDER_HEIGHT, 0, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    cv2.putText(img, " ".join(matches), (10, 30), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
-    # cv2.putText(img, str(hands_positions), (10, 60), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
+    cv2.putText(img, " ".join(matches), (10, 40), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
+    cv2.putText(img, "Use o mouse para desenhar um retangulo em volta do objeto", (10, 15), cv2.QT_FONT_NORMAL, 0.5, (100, 100, 100), 1)
+    cv2.putText(img, str(hands_positions or ""), (10, 65), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
 
     cv2.imshow("TOP CIENCIA DE DADOS I", img)
 
