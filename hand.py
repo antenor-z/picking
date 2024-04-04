@@ -1,3 +1,4 @@
+from tkinter import Tk, simpledialog
 import mediapipe as mp
 import threading
 import json
@@ -6,11 +7,15 @@ import json
 
 TOP_BORDER_HEIGHT = 80
 CONFIG_PATH = "utils/config.json"
+CAM_NUMBER = 0
 
 new_object = None
 def get_new_object(rect_start, rect_end):
     global new_object
-    new_object_name = input("Digite o nome do objeto (deixe em branco para cancelar): ")
+    root = Tk()
+    root.withdraw()
+    new_object_name = simpledialog.askstring("Novo objeto", "Escolha um nome:")
+    root.destroy()
     new_object = {
         "name": new_object_name,
         "point_1": [rect_start[0], rect_start[1] - TOP_BORDER_HEIGHT], 
@@ -49,7 +54,7 @@ def draw_rectangle(event, x, y, flags, param):
         cv2.imshow("TOP CIENCIA DE DADOS I", img)
         threading.Thread(target=get_new_object, args=(rect_start, rect_end)).start()        
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(CAM_NUMBER)
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
@@ -100,7 +105,7 @@ while True:
     cv2.imshow("TOP CIENCIA DE DADOS I", img)
 
     if new_object is not None:
-        if new_object["name"].strip() != "":
+        if new_object["name"] is not None and new_object["name"].strip() != "":
             points_of_interest.append(new_object)
             with open(CONFIG_PATH, "w") as fp:
                 json.dump(points_of_interest, fp=fp, indent=4)
