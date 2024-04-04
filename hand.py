@@ -1,10 +1,21 @@
 import mediapipe as mp
+import threading
 import json
 import cv2
 import json
 
 TOP_BORDER_HEIGHT = 80
 CONFIG_PATH = "utils/config.json"
+
+new_object = None
+def get_new_object(rect_start, rect_end):
+    global new_object
+    new_object_name = input("Digite o nome do objeto (deixe em branco para cancelar): ")
+    new_object = {
+        "name": new_object_name,
+        "point_1": [rect_start[0], rect_start[1] - TOP_BORDER_HEIGHT], 
+        "point_2": [rect_end[0], rect_end[1] - TOP_BORDER_HEIGHT]
+    }
 
 def mid_point(acc_cx, acc_cy):
     avg_cx = int(sum(acc_cx) / len(acc_cx))
@@ -36,17 +47,7 @@ def draw_rectangle(event, x, y, flags, param):
         rect_end = (x, y)
         cv2.rectangle(img, rect_start, rect_end, (0, 255, 0), 1)
         cv2.imshow("TOP CIENCIA DE DADOS I", img)
-        name = input("nome do objeto (deixe em branco para cancelar): ")
-        if name.strip() != "":
-            new_rect = {
-                "name": name,
-                "point_1": [rect_start[0], rect_start[1] - TOP_BORDER_HEIGHT], 
-                "point_2": [rect_end[0], rect_end[1] - TOP_BORDER_HEIGHT]
-            }
-            points_of_interest.append(new_rect)
-            with open(CONFIG_PATH, "w") as fp:
-                json.dump(points_of_interest, fp=fp, indent=4)
-            print("OK")
+        threading.Thread(target=get_new_object, args=(rect_start, rect_end)).start()        
 
 cap = cv2.VideoCapture(0)
 
@@ -97,6 +98,14 @@ while True:
     # cv2.putText(img, str(hands_positions), (10, 60), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
 
     cv2.imshow("TOP CIENCIA DE DADOS I", img)
+
+    if new_object is not None:
+        if new_object["name"].strip() != "":
+            points_of_interest.append(new_object)
+            with open(CONFIG_PATH, "w") as fp:
+                json.dump(points_of_interest, fp=fp, indent=4)
+            print(f"New object {new_object} added.")
+        new_object = None
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q") or cv2.getWindowProperty("TOP CIENCIA DE DADOS I", cv2.WND_PROP_VISIBLE) < 1:
