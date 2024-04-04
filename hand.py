@@ -11,8 +11,13 @@ def mid_point(acc_cx, acc_cy):
     avg_cy = int(sum(acc_cy) / len(acc_cy))
     return [avg_cx, avg_cy]
 
-with open(CONFIG_PATH) as fp:
-    points_of_interest = list(json.load(fp))
+try:
+    with open(CONFIG_PATH, 'r') as fp:
+        points_of_interest = json.load(fp)
+except FileNotFoundError:
+    with open(CONFIG_PATH, 'w+') as fp:
+        fp.write("[]")
+        points_of_interest = []
 
 drawing = False
 ix,iy = -1,-1
