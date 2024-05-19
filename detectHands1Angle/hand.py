@@ -6,7 +6,7 @@ import cv2
 import json
 
 TOP_BORDER_HEIGHT = 80
-CONFIG_PATH = "utils/config.json"
+CONFIG_PATH = "config-example.json"
 CAM_NUMBER = 0
 
 new_object = None
