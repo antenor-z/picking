@@ -7,7 +7,7 @@ import urllib.parse
 
 SCREEN_NAME = "teste"
 JSON_NAME = "boxes.json"
-CAMERA = 1
+CAMERA = 0
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
