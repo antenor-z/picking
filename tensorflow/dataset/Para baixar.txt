@@ -1,0 +1,3 @@
+Baixe o dataset em a4barros.com/public/dataset.zip
+Extraia as pastas arduino, lcd, oled etc
+E cole aqui
