@@ -1,0 +1,13 @@
+train: ./train/images
+val: ./valid/images
+test: ./test/images
+
+nc: 5
+names: ['arduino', 'atmega', 'blue_led', 'lcd', 'oled']
+
+roboflow:
+  workspace: work-kgvzg
+  project: electroclass
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/work-kgvzg/electroclass/dataset/1
