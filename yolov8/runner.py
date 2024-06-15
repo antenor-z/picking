@@ -21,6 +21,15 @@ while True:
         break
     
     results = model(frame)
+
+    for result in results:
+        for box in result.boxes:
+            x1, y1, x2, y2 = box.xyxy[0]
+            avg_x = (x1 + x2) / 2
+            avg_y = (y1 + y2) / 2
+            object_id = int(box.cls[0])
+            object_name = model.names[object_id]
+            print(f"{object_name} em ({avg_x}, {avg_y})")
     
     frame = results[0].plot()
     
