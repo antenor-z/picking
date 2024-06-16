@@ -13,15 +13,10 @@ model = YOLO(f"{os.getcwd()}/output/train_{mode}/weights/best.pt")
 
 cap = cv2.VideoCapture(0)
 
-
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Failed to capture image")
-        break
-    
+def predict(frame):
     results = model(frame)
 
+    points = []
     for result in results:
         for box in result.boxes:
             x1, y1, x2, y2 = box.xyxy[0]
@@ -29,15 +24,28 @@ while True:
             avg_y = (y1 + y2) / 2
             object_id = int(box.cls[0])
             object_name = model.names[object_id]
-            print(f"{object_name} em ({avg_x}, {avg_y})")
+            points.append([int(avg_x), int(avg_y), object_name])
+            
+    return results, points
     
-    frame = results[0].plot()
-    
-    cv2.imshow(f'TOP CIENCIA DE DADOS I [YOLO {mode}]', frame)
+if __name__ == "__main__":
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Failed to capture image")
+            break
+        
+        results, points = predict(frame)
 
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord("q") or cv2.getWindowProperty(f"TOP CIENCIA DE DADOS I [YOLO {mode}]", cv2.WND_PROP_VISIBLE) < 1:
-        break
+        frame = results[0].plot()
 
-cap.release()
-cv2.destroyAllWindows()
+        print(points)
+        
+        cv2.imshow(f'TOP CIENCIA DE DADOS I [YOLO {mode}]', frame)
+
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q") or cv2.getWindowProperty(f"TOP CIENCIA DE DADOS I [YOLO {mode}]", cv2.WND_PROP_VISIBLE) < 1:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
