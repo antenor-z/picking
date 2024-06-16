@@ -1,13 +1,13 @@
 from tkinter import Tk, simpledialog
-from yolov8.predictor import predict
-import mediapipe as mp
+from util import open_config
+from predictor import predict
 import threading
 import json
 import cv2
 import json
 
 TOP_BORDER_HEIGHT = 80
-CONFIG_PATH = "config-example.json"
+CONFIG_PATH = "config.json"
 CAM_NUMBER = 0
 
 new_object = None
@@ -23,18 +23,8 @@ def get_new_object(rect_start, rect_end):
         "point_2": [rect_end[0], rect_end[1] - TOP_BORDER_HEIGHT]
     }
 
-def mid_point(acc_cx, acc_cy):
-    avg_cx = int(sum(acc_cx) / len(acc_cx))
-    avg_cy = int(sum(acc_cy) / len(acc_cy))
-    return [avg_cx, avg_cy]
 
-try:
-    with open(CONFIG_PATH, 'r') as fp:
-        points_of_interest = json.load(fp)
-except FileNotFoundError:
-    with open(CONFIG_PATH, 'w+') as fp:
-        fp.write("[]")
-        points_of_interest = []
+points_of_interest = open_config()
 
 drawing = False
 ix,iy = -1,-1
@@ -57,44 +47,61 @@ def draw_rectangle(event, x, y, flags, param):
 
 cap = cv2.VideoCapture(CAM_NUMBER)
 
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands()
-mp_draw = mp.solutions.drawing_utils
-
 cv2.namedWindow("TOP CIENCIA DE DADOS I")
 cv2.setMouseCallback("TOP CIENCIA DE DADOS I", draw_rectangle)
 
 while True:
-    hands_positions = []
+    objs_positions = []
     matches = []
+    wrong = []
 
     success, img = cap.read()
-    # img = cv2.flip(img, 1)
     
-    _, hands_positions = predict(img)
+    _, objs_positions = predict(img)
 
-    for [avg_x, avg_y, obj_name] in hands_positions:
-        cv2.putText(img, obj_name, (avg_x, avg_y), cv2.QT_FONT_NORMAL, 0.5, (255, 0, 0), 1)
+    # Draw indications of found objects
+    for [avg_x, avg_y, obj_name] in objs_positions:
+        text_size, _ = cv2.getTextSize(obj_name, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+        text_width, text_height = text_size
+        
+        top_left = (avg_x - 30, avg_y - text_height)
+        bottom_right = (avg_x - 30 + text_width, avg_y + 5)
+        
+        cv2.rectangle(img, top_left, bottom_right, (255, 255, 255), cv2.FILLED)
+        cv2.putText(img, obj_name, (avg_x - 30, avg_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
 
+    # Draw boxes defined by the user
     for location in points_of_interest:
         color = (200, 0, 0)
-        for hand_position in hands_positions:
+        for hand_position in objs_positions:
             if location["point_1"][0] < hand_position[0] < location["point_2"][0] and \
-                location["point_1"][1] < hand_position[1] < location["point_2"][1]:
-                if location["name"] == hand_position[2]: # if object is in the right box
+            location["point_1"][1] < hand_position[1] < location["point_2"][1]:
+                if location["name"] == hand_position[2]:  # if object is in the right box
                     matches.append(location["name"])
                     color = (0, 200, 0)
                 else:  # if object is in the wrong box
+                    wrong.append(location["name"])
                     color = (0, 0, 200)
-                    
+
         title_position = (int(location["point_1"][0]), int(location["point_1"][1] - 10))
-        cv2.putText(img, location["name"], title_position, cv2.QT_FONT_NORMAL, 0.5, color, 1)
+        
+        text_size, _ = cv2.getTextSize(location["name"], cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+        text_width, text_height = text_size
+
+        top_left = (title_position[0], title_position[1] - text_height)
+        bottom_right = (title_position[0] + text_width, title_position[1] + 5)
+
+        cv2.rectangle(img, top_left, bottom_right, color, cv2.FILLED)
+        cv2.putText(img, location["name"], title_position, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         cv2.rectangle(img, location["point_1"], location["point_2"], color, 1)
 
+
+    # Draw information about object in right and wrong boxes
     img = cv2.copyMakeBorder(img, TOP_BORDER_HEIGHT, 0, 0, 0, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    cv2.putText(img, " ".join(matches), (10, 40), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
+    cv2.putText(img, "Correto: " + " ".join(matches), (10, 45), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
+    cv2.putText(img, "Errado: " + " ".join(wrong), (10, 70), cv2.QT_FONT_NORMAL, 0.7, (0, 0, 255), 1)
+
     cv2.putText(img, "Use o mouse para desenhar um retangulo em volta do objeto", (10, 15), cv2.QT_FONT_NORMAL, 0.5, (100, 100, 100), 1)
-    cv2.putText(img, str(hands_positions or ""), (10, 65), cv2.QT_FONT_NORMAL, 0.7, (0, 255, 0), 1)
 
     cv2.imshow("TOP CIENCIA DE DADOS I", img)
 
