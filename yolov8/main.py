@@ -1,5 +1,5 @@
 from tkinter import Tk, simpledialog
-from runner import predict
+from yolov8.predictor import predict
 import mediapipe as mp
 import threading
 import json
