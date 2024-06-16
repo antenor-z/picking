@@ -1,5 +1,5 @@
 import json
-CONFIG_PATH = "config-example.json"
+CONFIG_PATH = "config.json"
 
 def mid_point(acc_cx, acc_cy):
     avg_cx = int(sum(acc_cx) / len(acc_cx))
