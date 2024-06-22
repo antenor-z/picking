@@ -5,6 +5,8 @@ import json
 import http.client
 import urllib.parse
 
+#Run yolo over mediapipe solutions
+
 SCREEN_NAME = "teste"
 JSON_NAME = "boxes.json"
 CAMERA = 0
