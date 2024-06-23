@@ -9,9 +9,9 @@ if len(sys.argv) == 2 and sys.argv[1] in ["small", "nano", "medium"]:
 else:
     mode="nano"
 
-model = YOLO(f"{os.getcwd()}/output/train_{mode}/weights/best.pt")
+model = YOLO(f"{os.getcwd()}/weights/best.pt")
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 def predict(frame):
     results = model(frame)
